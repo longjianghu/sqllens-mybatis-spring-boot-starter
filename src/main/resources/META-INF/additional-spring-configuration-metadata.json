@@ -1,0 +1,40 @@
+{
+  "properties": [
+    {
+      "name": "sqllens.enabled",
+      "type": "boolean",
+      "description": "Enable or disable SqlLens SQL logging.",
+      "defaultValue": true
+    },
+    {
+      "name": "sqllens.explain-enabled",
+      "type": "boolean",
+      "description": "Enable EXPLAIN analysis for SELECT statements.",
+      "defaultValue": false
+    },
+    {
+      "name": "sqllens.max-sql-length",
+      "type": "int",
+      "description": "Maximum SQL length before truncation.",
+      "defaultValue": 4096
+    },
+    {
+      "name": "sqllens.print-full-sql",
+      "type": "boolean",
+      "description": "Print the full SQL without truncation when enabled. Overrides max-sql-length.",
+      "defaultValue": true
+    },
+    {
+      "name": "sqllens.slow-threshold",
+      "type": "long",
+      "description": "Slow query threshold in milliseconds. Queries exceeding this value will be logged at WARN level.",
+      "defaultValue": 1000
+    },
+    {
+      "name": "sqllens.exclude-tables",
+      "type": "java.util.List<java.lang.String>",
+      "description": "List of table name prefixes to exclude from EXPLAIN analysis.",
+      "defaultValue": ["information_schema.", "mysql.", "performance_schema."]
+    }
+  ]
+}
