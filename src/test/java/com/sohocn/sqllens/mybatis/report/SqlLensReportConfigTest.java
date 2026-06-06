@@ -1,14 +1,13 @@
-package com.sohocn.sqllens.report;
+package com.sohocn.sqllens.mybatis.report;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class SqlLensReportConfigTest {
 

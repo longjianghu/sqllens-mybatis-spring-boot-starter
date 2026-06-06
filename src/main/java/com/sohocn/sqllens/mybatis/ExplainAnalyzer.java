@@ -1,4 +1,12 @@
-package com.sohocn.sqllens;
+package com.sohocn.sqllens.mybatis;
+
+import java.sql.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
 
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
@@ -6,21 +14,31 @@ import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.DataSource;
-import java.sql.*;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+/**
+ * The type Explain analyzer.
+ *
+ * @author longjianghu
+ */
 public class ExplainAnalyzer {
     private static final Logger log = LoggerFactory.getLogger(ExplainAnalyzer.class);
 
     private final Set<String> excludeTablesUpper;
     private final boolean explainEnabled;
+    private final boolean explainAnalyze;
 
-    public ExplainAnalyzer(boolean explainEnabled, List<String> excludeTables) {
+    /**
+     * Instantiates a new Explain analyzer.
+     *
+     * @param explainEnabled
+     *            to explain enabled
+     * @param explainAnalyze
+     *            to explain analyze
+     * @param excludeTables
+     *            the exclude tables
+     */
+    public ExplainAnalyzer(boolean explainEnabled, boolean explainAnalyze, List<String> excludeTables) {
         this.explainEnabled = explainEnabled;
+        this.explainAnalyze = explainAnalyze;
         this.excludeTablesUpper = excludeTables == null
             ? Collections.emptySet()
             : excludeTables.stream()
@@ -28,6 +46,17 @@ public class ExplainAnalyzer {
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Analyze string.
+     *
+     * @param boundSql
+     *            the bound SQL
+     * @param configuration
+     *            the configuration
+     * @param dataSource
+     *            the data source
+     * @return the string
+     */
     public String analyze(BoundSql boundSql, Configuration configuration, DataSource dataSource) {
         if (boundSql == null || configuration == null || dataSource == null) {
             return null;
@@ -36,8 +65,9 @@ public class ExplainAnalyzer {
         if (!this.shouldExplain(sql)) {
             return null;
         }
+        String prefix = explainAnalyze ? "EXPLAIN ANALYZE " : "EXPLAIN ";
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement stmt = this.createExplainStatement(sql, boundSql, configuration, connection);
+             PreparedStatement stmt = this.createExplainStatement(prefix, sql, boundSql, configuration, connection);
              ResultSet rs = stmt.executeQuery()) {
             return this.parseExplainResult(rs);
         } catch (SQLException e) {
@@ -46,6 +76,13 @@ public class ExplainAnalyzer {
         }
     }
 
+    /**
+     * Should explain boolean.
+     *
+     * @param sql
+     *            the SQL
+     * @return the boolean
+     */
     public boolean shouldExplain(String sql) {
         if (!explainEnabled || sql == null) {
             return false;
@@ -62,10 +99,10 @@ public class ExplainAnalyzer {
         return true;
     }
 
-    private PreparedStatement createExplainStatement(String sql, BoundSql boundSql,
+    private PreparedStatement createExplainStatement(String prefix, String sql, BoundSql boundSql,
                                                      Configuration configuration,
                                                      Connection connection) throws SQLException {
-        PreparedStatement stmt = connection.prepareStatement("EXPLAIN " + sql);
+        PreparedStatement stmt = connection.prepareStatement(prefix + sql);
         List<ParameterMapping> mappings = boundSql.getParameterMappings();
         for (int i = 0; i < mappings.size(); i++) {
             String property = mappings.get(i).getProperty();

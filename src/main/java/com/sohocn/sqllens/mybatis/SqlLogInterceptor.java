@@ -1,7 +1,8 @@
-package com.sohocn.sqllens;
+package com.sohocn.sqllens.mybatis;
 
-import com.sohocn.sqllens.report.SqlLensReportData;
-import com.sohocn.sqllens.report.SqlLensReporter;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -13,9 +14,14 @@ import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
+import com.sohocn.sqllens.mybatis.report.SqlLensReportData;
+import com.sohocn.sqllens.mybatis.report.SqlLensReporter;
 
+/**
+ * The type Sql log interceptor.
+ *
+ * @author longjianghu
+ */
 @Intercepts({
     @Signature(type = Executor.class, method = "update",
                args = {MappedStatement.class, Object.class}),
@@ -32,6 +38,16 @@ public class SqlLogInterceptor implements Interceptor {
     private final SqlLensLogger logger;
     private final SqlLensReporter reporter;
 
+    /**
+     * Instantiates a new Sql log interceptor.
+     *
+     * @param logger
+     *            the logger
+     * @param analyzer
+     *            the analyzer
+     * @param reporter
+     *            the reporter
+     */
     public SqlLogInterceptor(SqlLensLogger logger, ExplainAnalyzer analyzer, SqlLensReporter reporter) {
         this.logger = logger;
         this.analyzer = analyzer;

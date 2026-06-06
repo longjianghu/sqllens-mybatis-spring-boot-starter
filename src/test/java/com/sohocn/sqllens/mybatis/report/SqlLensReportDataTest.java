@@ -1,8 +1,8 @@
-package com.sohocn.sqllens.report;
-
-import org.junit.jupiter.api.Test;
+package com.sohocn.sqllens.mybatis.report;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class SqlLensReportDataTest {
 

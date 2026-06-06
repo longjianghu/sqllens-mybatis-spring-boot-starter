@@ -1,4 +1,7 @@
-package com.sohocn.sqllens;
+package com.sohocn.sqllens.mybatis;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,44 +13,41 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 class ExplainAnalyzerTest {
 
     @Test
     void shouldExplain_returnsFalse_whenDisabled() {
-        ExplainAnalyzer analyzer = new ExplainAnalyzer(false, Collections.singletonList("information_schema."));
+        ExplainAnalyzer analyzer = new ExplainAnalyzer(false, false, Collections.singletonList("information_schema."));
         assertFalse(analyzer.shouldExplain("SELECT * FROM user"));
     }
 
     @Test
     void shouldExplain_returnsFalse_forNonSelect() {
-        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, Collections.singletonList("information_schema."));
+        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, false, Collections.singletonList("information_schema."));
         assertFalse(analyzer.shouldExplain("INSERT INTO user VALUES (1, 'test')"));
     }
 
     @Test
     void shouldExplain_returnsFalse_forSystemTable() {
-        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, java.util.Arrays.asList("information_schema.", "mysql."));
+        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, false, java.util.Arrays.asList("information_schema.", "mysql."));
         assertFalse(analyzer.shouldExplain("SELECT * FROM information_schema.tables"));
     }
 
     @Test
     void shouldExplain_returnsTrue_forSelect() {
-        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, Collections.singletonList("information_schema."));
+        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, false, Collections.singletonList("information_schema."));
         assertTrue(analyzer.shouldExplain("SELECT * FROM user WHERE id = 1"));
     }
 
     @Test
     void shouldExplain_isCaseInsensitive() {
-        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, Collections.singletonList("information_schema."));
+        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, false, Collections.singletonList("information_schema."));
         assertTrue(analyzer.shouldExplain("select * from user"));
     }
 
     @Test
     void analyze_returnsExplainResult() throws Exception {
-        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, Collections.singletonList("information_schema."));
+        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, false, Collections.singletonList("information_schema."));
 
         DataSource dataSource = mock(DataSource.class);
         Connection connection = mock(Connection.class);
@@ -82,7 +82,7 @@ class ExplainAnalyzerTest {
 
     @Test
     void analyze_returnsNull_whenNotSelect() throws Exception {
-        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, Collections.singletonList("information_schema."));
+        ExplainAnalyzer analyzer = new ExplainAnalyzer(true, false, Collections.singletonList("information_schema."));
 
         DataSource dataSource = mock(DataSource.class);
         org.apache.ibatis.mapping.BoundSql boundSql = mock(org.apache.ibatis.mapping.BoundSql.class);
@@ -97,7 +97,7 @@ class ExplainAnalyzerTest {
 
     @Test
     void analyze_returnsNull_whenDisabled() {
-        ExplainAnalyzer analyzer = new ExplainAnalyzer(false, Collections.singletonList("information_schema."));
+        ExplainAnalyzer analyzer = new ExplainAnalyzer(false, false, Collections.singletonList("information_schema."));
 
         DataSource dataSource = mock(DataSource.class);
         org.apache.ibatis.mapping.BoundSql boundSql = mock(org.apache.ibatis.mapping.BoundSql.class);

@@ -1,21 +1,21 @@
-package com.sohocn.sqllens;
+package com.sohocn.sqllens.mybatis;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Properties;
+
+import javax.sql.DataSource;
 
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.RowBounds;
 import org.junit.jupiter.api.Test;
 
-import com.sohocn.sqllens.report.SqlLensReportData;
-import com.sohocn.sqllens.report.SqlLensReporter;
-
-import javax.sql.DataSource;
-import java.util.Properties;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.sohocn.sqllens.mybatis.report.SqlLensReportData;
+import com.sohocn.sqllens.mybatis.report.SqlLensReporter;
 
 class SqlLogInterceptorTest {
 

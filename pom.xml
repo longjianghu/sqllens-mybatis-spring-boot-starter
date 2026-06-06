@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.sohocn.sqllens</groupId>
-    <artifactId>sqllens-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <artifactId>sqllens-mybatis-spring-boot-starter</artifactId>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
 
-    <name>sqllens-spring-boot-starter</name>
+    <name>sqllens-mybatis-spring-boot-starter</name>
     <description>MyBatis SQL Log and Slow Query Monitor Spring Boot Starter</description>
-    <url>https://github.com/longjianghu/sqllens-spring-boot-starter</url>
+    <url>https://github.com/longjianghu/sqllens-mybatis-spring-boot-starter</url>
 
     <licenses>
         <license>
@@ -29,9 +29,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/longjianghu/sqllens-spring-boot-starter.git</connection>
-        <developerConnection>scm:git:ssh://github.com/longjianghu/sqllens-spring-boot-starter.git</developerConnection>
-        <url>https://github.com/longjianghu/sqllens-spring-boot-starter</url>
+        <connection>scm:git:git://github.com/longjianghu/sqllens-mybatis-spring-boot-starter.git</connection>
+        <developerConnection>scm:git:ssh://github.com/longjianghu/sqllens-mybatis-spring-boot-starter.git
+        </developerConnection>
+        <url>https://github.com/longjianghu/sqllens-mybatis-spring-boot-starter</url>
     </scm>
 
     <properties>
@@ -125,9 +126,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <gpgExecutable>gpg</gpgExecutable>
-                </configuration>
             </plugin>
 
             <plugin>
