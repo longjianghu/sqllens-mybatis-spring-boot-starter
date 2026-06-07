@@ -27,7 +27,7 @@ SqlLens 是一个轻量级的 Spring Boot Starter，自动拦截 MyBatis SQL 执
 <dependency>
     <groupId>net.sohocn.sqllens</groupId>
     <artifactId>sqllens-mybatis-spring-boot-starter</artifactId>
-    <version>1.1.1</version>
+  <version>1.1.2</version>
 </dependency>
 ```
 
@@ -187,7 +187,7 @@ SqlLens is a lightweight Spring Boot Starter that automatically intercepts MyBat
 <dependency>
     <groupId>net.sohocn.sqllens</groupId>
     <artifactId>sqllens-mybatis-spring-boot-starter</artifactId>
-    <version>1.1.1</version>
+  <version>1.1.2</version>
 </dependency>
 ```
 
@@ -353,7 +353,7 @@ SqlLens は軽量な Spring Boot Starter であり、MyBatis の SQL 実行を�
 <dependency>
     <groupId>net.sohocn.sqllens</groupId>
     <artifactId>sqllens-mybatis-spring-boot-starter</artifactId>
-    <version>1.1.1</version>
+  <version>1.1.2</version>
 </dependency>
 ```
 
@@ -515,7 +515,7 @@ SqlLens는 경량 Spring Boot Starter로, MyBatis SQL 실행을 자동으로 가
 <dependency>
     <groupId>net.sohocn.sqllens</groupId>
     <artifactId>sqllens-mybatis-spring-boot-starter</artifactId>
-    <version>1.1.1</version>
+  <version>1.1.2</version>
 </dependency>
 ```
 

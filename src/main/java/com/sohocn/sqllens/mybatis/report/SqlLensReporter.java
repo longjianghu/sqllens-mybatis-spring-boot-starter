@@ -25,11 +25,13 @@ public class SqlLensReporter {
     private static final int MAX_CONSECUTIVE_FAILURES = 3;
     private static final int QUEUE_CAPACITY = 1000;
 
-    private final SqlLensReportConfig config;
+    private volatile SqlLensReportConfig config;
     private final ScheduledExecutorService executor;
     private final ArrayDeque<SqlLensReportData> queue = new ArrayDeque<>(QUEUE_CAPACITY);
     private final ReentrantLock lock = new ReentrantLock();
     private int consecutiveFailures = 0;
+    private volatile boolean schedulerStarted;
+    private volatile boolean warnedInvalidConfig;
 
     /**
      * Instantiates a new Sql lens reporter.
@@ -47,8 +49,25 @@ public class SqlLensReporter {
 
         if (config.isValid()) {
             this.executor.scheduleWithFixedDelay(this::flush, 5, config.getReportIntervalSeconds(), TimeUnit.SECONDS);
+            schedulerStarted = true;
             log.info("[SqlLens] Reporter started, reporting to {}", config.getServerUrl());
         }
+    }
+
+    /**
+     * Reload config from .idea/sqllens.json if the file has changed.
+     * Returns cached config when unchanged (no file I/O overhead).
+     */
+    private SqlLensReportConfig getEffectiveConfig() {
+        SqlLensReportConfig latest = SqlLensReportConfig.load();
+        if (latest.isValid() && (config == null || !config.equals(latest))) {
+            log.info("[SqlLens] Config updated, new url: {}", latest.getServerUrl());
+            config = latest;
+        }
+        if (config == null || !config.isValid()) {
+            config = latest;
+        }
+        return config;
     }
 
     /**
@@ -59,7 +78,20 @@ public class SqlLensReporter {
      */
     public void report(SqlLensReportData data) {
         if (!config.isValid()) {
-            return;
+            // try reloading — config may have been added since startup
+            SqlLensReportConfig newConfig = SqlLensReportConfig.load();
+            if (!newConfig.isValid()) {
+                if (!warnedInvalidConfig) {
+                    warnedInvalidConfig = true;
+                    log.warn("[SqlLens] Report skipped: config not loaded. "
+                            + "Please create .idea/sqllens.json with serverUrl and token "
+                            + "in your project root directory.");
+                }
+                return;
+            }
+            config = newConfig;
+            warnedInvalidConfig = false;
+            startScheduler();
         }
         lock.lock();
         try {
@@ -70,6 +102,15 @@ public class SqlLensReporter {
         } finally {
             lock.unlock();
         }
+    }
+
+    private synchronized void startScheduler() {
+        if (schedulerStarted) {
+            return;
+        }
+        this.executor.scheduleWithFixedDelay(this::flush, 5, config.getReportIntervalSeconds(), TimeUnit.SECONDS);
+        schedulerStarted = true;
+        log.info("[SqlLens] Reporter started (lazy), reporting to {}", config.getServerUrl());
     }
 
     /**
@@ -115,16 +156,23 @@ public class SqlLensReporter {
     }
 
     private boolean sendBatch(List<SqlLensReportData> batch) {
+        SqlLensReportConfig currentConfig = getEffectiveConfig();
         HttpURLConnection conn = null;
         try {
             String jsonArray = toJsonArray(batch);
             byte[] body = jsonArray.getBytes(StandardCharsets.UTF_8);
 
-            URL url = new URL(config.getServerUrl());
+            URL url = new URL(currentConfig.getServerUrl());
+            String token = currentConfig.getToken();
+            String maskedToken = maskToken(token);
+
+            log.info("[SqlLens] Pushing report -> url: {}, token: {}, data: {}",
+                    url, maskedToken, jsonArray);
+
             conn = (HttpURLConnection)url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-            conn.setRequestProperty("Authorization", "Bearer " + config.getToken());
+            conn.setRequestProperty("Authorization", "Bearer " + token);
             conn.setDoOutput(true);
             conn.setConnectTimeout(3000);
             conn.setReadTimeout(5000);
@@ -151,6 +199,22 @@ public class SqlLensReporter {
                 conn.disconnect();
             }
         }
+    }
+
+    /**
+     * Mask token for logging, showing only first 4 and last 4 characters.
+     *
+     * @param token the token
+     * @return masked token
+     */
+    private static String maskToken(String token) {
+        if (token == null || token.isEmpty()) {
+            return "null";
+        }
+        if (token.length() <= 8) {
+            return token.charAt(0) + "***";
+        }
+        return token.substring(0, 4) + "****" + token.substring(token.length() - 4);
     }
 
     private static String toJsonArray(List<SqlLensReportData> batch) {

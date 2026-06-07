@@ -13,7 +13,9 @@ class SqlLensReportDataTest {
             "SELECT * FROM user WHERE id = 1",
             120L,
             "id=1, type=ALL",
-            "com.example.UserMapper.findById"
+            "com.example.UserMapper.findById",
+            "com.example.UserMapper.findById",
+            "mysql"
         );
 
         String json = data.toJson();
@@ -22,6 +24,8 @@ class SqlLensReportDataTest {
         assertTrue(json.contains("\"duration\":120"));
         assertTrue(json.contains("\"explainResult\":\"id=1, type=ALL\""));
         assertTrue(json.contains("\"mapperMethod\":\"com.example.UserMapper.findById\""));
+        assertTrue(json.contains("\"mapperId\":\"com.example.UserMapper.findById\""));
+        assertTrue(json.contains("\"dbType\":\"mysql\""));
         assertTrue(json.contains("\"timestamp\":"));
     }
 
@@ -32,13 +36,16 @@ class SqlLensReportDataTest {
             "INSERT INTO user VALUES (1)",
             50L,
             null,
-            "com.example.UserMapper.insert"
+            "com.example.UserMapper.insert",
+            "com.example.UserMapper.insert",
+            "mysql"
         );
 
         String json = data.toJson();
 
         assertTrue(json.contains("\"sql\":\"INSERT INTO user VALUES (1)\""));
         assertFalse(json.contains("explainResult"));
+        assertTrue(json.contains("\"dbType\":\"mysql\""));
     }
 
     @Test
@@ -55,7 +62,9 @@ class SqlLensReportDataTest {
             "SELECT * FROM user WHERE name = 'it\\'s'",
             10L,
             null,
-            "com.example.UserMapper.findByName"
+            "com.example.UserMapper.findByName",
+            "com.example.UserMapper.findByName",
+            "mysql"
         );
 
         String json = data.toJson();

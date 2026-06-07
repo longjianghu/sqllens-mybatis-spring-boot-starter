@@ -20,15 +20,14 @@ class SqlLensReportConfigTest {
         try (FileWriter writer = new FileWriter(configFile)) {
             writer.write("{\"serverUrl\":\"http://localhost:8080\",\"token\":\"abc123\"}");
         }
-        File originalDir = new File(System.getProperty("user.dir"));
-        System.setProperty("user.dir", tempDir.getAbsolutePath());
+        System.setProperty("sqllens.project.dir", tempDir.getAbsolutePath());
         try {
             SqlLensReportConfig config = SqlLensReportConfig.load();
             assertTrue(config.isValid());
             assertEquals("http://localhost:8080", config.getServerUrl());
             assertEquals("abc123", config.getToken());
         } finally {
-            System.setProperty("user.dir", originalDir.getAbsolutePath());
+            System.clearProperty("sqllens.project.dir");
             deleteRecursive(tempDir);
         }
     }
@@ -38,13 +37,12 @@ class SqlLensReportConfigTest {
         File tempDir = Files.createTempDirectory("sqllens-test").toFile();
         File ideaDir = new File(tempDir, ".idea");
         ideaDir.mkdirs();
-        File originalDir = new File(System.getProperty("user.dir"));
-        System.setProperty("user.dir", tempDir.getAbsolutePath());
+        System.setProperty("sqllens.project.dir", tempDir.getAbsolutePath());
         try {
             SqlLensReportConfig config = SqlLensReportConfig.load();
             assertFalse(config.isValid());
         } finally {
-            System.setProperty("user.dir", originalDir.getAbsolutePath());
+            System.clearProperty("sqllens.project.dir");
             deleteRecursive(tempDir);
         }
     }

@@ -1,7 +1,11 @@
 package com.sohocn.sqllens.mybatis;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+
+import javax.sql.DataSource;
 
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
@@ -37,6 +41,8 @@ public class SqlLogInterceptor implements Interceptor {
     private final ExplainAnalyzer analyzer;
     private final SqlLensLogger logger;
     private final SqlLensReporter reporter;
+    private volatile String dbType;
+    private final Object dbTypeLock = new Object();
 
     /**
      * Instantiates a new Sql log interceptor.
@@ -81,9 +87,12 @@ public class SqlLogInterceptor implements Interceptor {
                 if (reporter != null) {
                     String formattedSql = logger.formatSql(boundSql, config);
                     String mapperMethod = ms.getId();
+                    String mapperId = ms.getId();
+                    DataSource dataSource = config.getEnvironment().getDataSource();
+                    String detectedDbType = getDbType(dataSource);
                     SqlLensReportData data = new SqlLensReportData(
                             boundSql.getSql().trim(), formattedSql, durationMs,
-                            explainResult, mapperMethod
+                            explainResult, mapperMethod, mapperId, detectedDbType
                     );
                     reporter.report(data);
                 }
@@ -100,5 +109,45 @@ public class SqlLogInterceptor implements Interceptor {
 
     @Override
     public void setProperties(Properties properties) {
+    }
+
+    /**
+     * Gets db type from DataSource, cached after first detection.
+     *
+     * @param dataSource
+     *            the data source
+     * @return the db type
+     */
+    private String getDbType(DataSource dataSource) {
+        if (dbType != null) {
+            return dbType;
+        }
+        synchronized (dbTypeLock) {
+            if (dbType != null) {
+                return dbType;
+            }
+            if (dataSource == null) {
+                dbType = "unknown";
+                return dbType;
+            }
+            try {
+                Connection conn = dataSource.getConnection();
+                if (conn == null) {
+                    log.warn("[SqlLens] DataSource returned null connection, cannot detect db type");
+                    dbType = "unknown";
+                    return dbType;
+                }
+                try {
+                    String productName = conn.getMetaData().getDatabaseProductName();
+                    dbType = productName != null ? productName.toLowerCase() : "unknown";
+                } finally {
+                    conn.close();
+                }
+            } catch (SQLException e) {
+                log.warn("[SqlLens] Failed to detect db type: {}", e.getMessage());
+                dbType = "unknown";
+            }
+        }
+        return dbType;
     }
 }

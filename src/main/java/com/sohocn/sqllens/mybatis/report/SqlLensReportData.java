@@ -10,6 +10,8 @@ public class SqlLensReportData {
     private final String explainResult;
     private final String formattedSql;
     private final String mapperMethod;
+    private final String mapperId;
+    private final String dbType;
     private final String sql;
     private final long timestamp;
 
@@ -26,15 +28,21 @@ public class SqlLensReportData {
      *            the explain result
      * @param mapperMethod
      *            the mapper method
+     * @param mapperId
+     *            the mapper id
+     * @param dbType
+     *            the db type
      */
     public SqlLensReportData(String sql, String formattedSql, long duration, String explainResult,
-        String mapperMethod) {
+        String mapperMethod, String mapperId, String dbType) {
         this.sql = sql;
         this.formattedSql = formattedSql;
         this.duration = duration;
         this.explainResult = explainResult;
         this.timestamp = System.currentTimeMillis();
         this.mapperMethod = mapperMethod;
+        this.mapperId = mapperId;
+        this.dbType = dbType;
     }
 
     /**
@@ -100,6 +108,24 @@ public class SqlLensReportData {
     }
 
     /**
+     * Gets mapper id.
+     *
+     * @return the mapper id
+     */
+    public String getMapperId() {
+        return mapperId;
+    }
+
+    /**
+     * Gets db type.
+     *
+     * @return the db type
+     */
+    public String getDbType() {
+        return dbType;
+    }
+
+    /**
      * To JSON string.
      *
      * @return the string
@@ -124,6 +150,12 @@ public class SqlLensReportData {
         sb.append(",");
 
         appendField(sb, "mapperMethod", mapperMethod);
+        sb.append(",");
+
+        appendField(sb, "mapperId", mapperId);
+        sb.append(",");
+
+        appendField(sb, "dbType", dbType);
         sb.append("}");
         return sb.toString();
     }

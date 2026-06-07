@@ -128,7 +128,14 @@ public class ExplainAnalyzer {
                 if (i > 1) {
                     sb.append(", ");
                 }
-                sb.append(meta.getColumnName(i)).append("=").append(rs.getObject(i));
+                if (cols == 1) {
+                    // EXPLAIN ANALYZE returns a single column with tree output,
+                    // skip the column name and "-> " tree markers.
+                    String val = String.valueOf(rs.getObject(i));
+                    sb.append(val.replaceAll("(?m)^-> ", ""));
+                } else {
+                    sb.append(meta.getColumnName(i)).append("=").append(rs.getObject(i));
+                }
             }
         } while (rs.next());
 
